@@ -21,6 +21,14 @@ have a bundle branch block. The label distribution is severely long-tailed —
 a handful of rhythms account for most of the mass, while many conditions
 appear in a few dozen records out of 45,000.
 
+![Frequency of cardiac conditions in the sample](docs/figures/01-condition-frequency.png)
+
+Sinus bradycardia dominates; the tail runs down to conditions appearing once
+or twice in 45,152 records. Grouped by category, 77.5% of patients carry an
+arrhythmia:
+
+![Condition categories by patient-level occurrence](docs/figures/02-condition-categories.png)
+
 That shape drives three decisions that run through the whole project:
 
 **Micro and macro F1 are always reported together.** Micro is dominated by the
@@ -36,6 +44,8 @@ arrhythmia exceeds the cost of a false alarm.
 **Thresholds are never selected on the test set.** The sweep runs on training
 folds (or, for the CNN, on a validation split carved out of the training
 portion). Selecting a cutoff on test data would leak it and inflate the score.
+
+![Decision algorithm: ASHA tuning, metric ranking, recall-constrained cutoff](docs/figures/08-decision-algorithm.png)
 
 ---
 
@@ -62,6 +72,13 @@ which the models were compared.
 |---|---|---|---|---|---|---|
 | 0.35 | 0.7147 | 0.2078 | 0.7478 | 0.6845 | 0.2879 | 0.2078 |
 
+![CNN_250Hz performance across probability cutoffs](docs/figures/19-cutoff-cnn-250hz.png)
+
+The dashed line is the selected cutoff. Micro F1 is flat between roughly 0.30
+and 0.45, so the operating point is not knife-edge — but macro F1 is *falling*
+across that whole range, which is the trade-off the single headline number
+hides.
+
 The CNN was the selected final model and the only one carried through to the
 held-out test set. Validation-to-test drop is 0.005 in micro F1, so the model
 generalises and the chosen cutoff transfers.
@@ -81,10 +98,14 @@ variance, but the 100 Incremental-PCA components in XGB_100F capture only
 diagnostic information lives in localised morphology, not in the directions of
 greatest global variance.
 
+![Cumulative explained variance across resampled ECG leads](docs/figures/10-pca-signal-variance.png)
+
 **The CNN wins because it learns temporal filters.** At 250 Hz each sample is
 4 ms, so the stem's kernel of 15 spans ~60 ms and the residual blocks' kernel
 of 7 spans ~28 ms — both on the scale of a QRS complex, which typically runs
 60–120 ms. The architecture is matched to the physiology it needs to detect.
+
+![CNN_250Hz ResNet1D architecture compared with Weimann's ResNet](docs/figures/07-architecture-comparison.png)
 
 **Every model collapses on macro metrics, and that is the real finding.** The
 best macro F1 is 0.22 against a micro F1 of 0.72. The label distribution is
@@ -249,6 +270,14 @@ they carry the most missingness of the 22. The rest are median-imputed.
 
 **Not a clinical tool.** This is a methods study on a public research dataset.
 Nothing here is validated for diagnostic use.
+
+---
+
+## Figures
+
+Six figures are embedded above. The full set — per-model tuning histories and
+cutoff sweeps, the conditional-probability matrix, feature correlations and
+lead-level examples — is indexed in [`docs/figures/`](docs/figures/).
 
 ---
 
