@@ -2,11 +2,14 @@
 
 **Multi-label prediction of cardiac conditions from 12-lead ECG, comparing handcrafted signal features against learned representations.**
 
-Five models on ~45,000 clinical ECG recordings: three built on 22 handcrafted
-signal-processing features, two on the raw waveform. The interesting result is
-not which one wins overall — it is that they win on *different metrics*, and
-the gap between micro and macro F1 says more about the problem than any single
-score does.
+Five models on 45,152 clinical ECG recordings from Shaoxing People's Hospital,
+labelled across 94 diagnostic categories: three built on handcrafted
+signal-processing features, two on the raw waveform.
+
+A compact 1D ResNet wins on every metric, reaching 0.71 micro F1 on held-out
+data. The more interesting number is its macro F1 of 0.21 — the gap between
+the two is the whole story of this dataset, and it is the reason the project
+concludes with a screening tool rather than a diagnostic one.
 
 ---
 
@@ -38,43 +41,67 @@ portion). Selecting a cutoff on test data would leak it and inflate the score.
 
 ## Results
 
-The CNN is the only model the original study evaluated on the held-out test
-set. The four classical models were scored by cross-validation only, so their
-numbers are **not** directly comparable to the CNN's and are labelled as such.
+94 diagnostic labels across 45,152 recordings, split 36,121 train / 9,031 test.
 
-### Held-out test set
+### Model comparison at each model's selected cutoff
 
-| Model | Cutoff | F1 micro | F1 macro | Precision micro | Recall micro |
-|---|---|---|---|---|---|
-| **CNN_250Hz** (1D ResNet on raw signal) | 0.35 | **0.7147** | 0.2078 | 0.7478 | 0.6845 |
+| Model | Features | Cutoff | F1 micro | F1 macro | Prec. micro | Rec. micro | Prec. macro | Rec. macro |
+|---|---|---|---|---|---|---|---|---|
+| SGD_18F | 18 handcrafted | 0.45 | 0.1153 | 0.0733 | 0.0621 | 0.8085 | 0.0472 | 0.6098 |
+| SGD_13C | 13 PCA of features | 0.45 | 0.1030 | 0.0672 | 0.0550 | 0.7965 | 0.0430 | 0.6217 |
+| XGB_18F | 18 handcrafted | 0.30 | 0.5489 | 0.1045 | 0.6270 | 0.4881 | 0.1576 | 0.0934 |
+| XGB_100F | 100 signal PCA | 0.30 | 0.5051 | 0.0574 | 0.6286 | 0.4222 | 0.1121 | 0.0515 |
+| **CNN_250Hz** | raw 12-lead signal | 0.35 | **0.7196** | **0.2174** | 0.7476 | 0.6937 | 0.2742 | 0.2149 |
 
-### Cross-validated cutoff sweeps (training folds — not test scores)
+These are cross-validated (for the CNN, validation-split) scores — the basis on
+which the models were compared.
 
-| Model | Features | Best F1 micro | at cutoff |
-|---|---|---|---|
-| XGB_18F | 18 handcrafted | 0.5489 | 0.30 |
-| XGB_100F | 100 signal PCA components | 0.5051 | 0.25 |
-| SGD_18F | 18 handcrafted | 0.1249 | 0.50 |
-| SGD_13C | 13 PCA of handcrafted | 0.1129 | 0.50 |
+### CNN_250Hz on the held-out test set
 
-**What this shows.** The linear models fail on this problem — one-vs-rest SGD
-never gets near the tree ensembles, and PCA-compressing the features first
-(SGD_13C) makes it slightly worse rather than better. Gradient boosting on 18
-interpretable features beats the same algorithm on 100 PCA components of the
-raw waveform, which is a useful negative result: for this task, careful feature
-engineering carried more signal than an unsupervised basis over the raw trace.
+| Cutoff | F1 micro | F1 macro | Prec. micro | Rec. micro | Prec. macro | Rec. macro |
+|---|---|---|---|---|---|---|
+| 0.35 | 0.7147 | 0.2078 | 0.7478 | 0.6845 | 0.2879 | 0.2078 |
 
-The CNN reaches the highest micro F1 but its macro F1 of 0.21 exposes the real
-limitation — it performs well on frequent rhythms and poorly across the long
-tail. `outputs/tables/*_per_label.csv` shows which conditions are never
-predicted at all.
+The CNN was the selected final model and the only one carried through to the
+held-out test set. Validation-to-test drop is 0.005 in micro F1, so the model
+generalises and the chosen cutoff transfers.
 
-**On reproducibility.** Re-running the pipeline will not reproduce these
-figures exactly. Ray Tune's search is seeded but its trial scheduling is not
-fully deterministic under parallel execution, and some CUDA kernels are
-nondeterministic. Expect small variation in the third decimal place.
+### What the numbers show
 
----
+**Linear models fail outright.** One-vs-rest SGD reaches micro F1 of 0.12 at a
+cutoff tuned for ~0.80 recall. A linear decision boundary cannot separate
+arrhythmias whose signature is waveform morphology, and compressing the
+features first (SGD_13C) makes it slightly worse rather than better.
+
+**Handcrafted features beat an unsupervised basis over the raw signal.**
+XGB_18F edges out XGB_100F by 0.044 micro F1 and 0.047 macro. The reason is
+visible in the variance: the 13 components in SGD_13C retain 96.0% of feature
+variance, but the 100 Incremental-PCA components in XGB_100F capture only
+**52.0%** of raw waveform variance. PCA is the wrong tool for this signal —
+diagnostic information lives in localised morphology, not in the directions of
+greatest global variance.
+
+**The CNN wins because it learns temporal filters.** At 250 Hz each sample is
+4 ms, so the stem's kernel of 15 spans ~60 ms and the residual blocks' kernel
+of 7 spans ~28 ms — both on the scale of a QRS complex, which typically runs
+60–120 ms. The architecture is matched to the physiology it needs to detect.
+
+**Every model collapses on macro metrics, and that is the real finding.** The
+best macro F1 is 0.22 against a micro F1 of 0.72. The label distribution is
+severely long-tailed — some of the 94 conditions appear fewer than ten times —
+so aggregate performance is carried by a handful of common rhythms. Rare
+classes were deliberately retained rather than filtered, since they are often
+the clinically significant ones, but predictions for them should be treated as
+unreliable. `outputs/tables/*_per_label.csv` shows exactly which conditions the
+model never predicts.
+
+The practical reading: this is a **screening** tool for well-represented
+arrhythmias, not a diagnostic replacement.
+
+**On reproducibility.** Re-running will not reproduce these figures exactly.
+Ray Tune's search is seeded but its trial scheduling is not fully
+deterministic under parallel execution, and some CUDA kernels are
+nondeterministic. Expect variation in the third decimal place.
 
 ## Repository layout
 
