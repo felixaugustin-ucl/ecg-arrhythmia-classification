@@ -1,0 +1,36 @@
+# Data — 5.3 GB PhysioNet download, never committed. See README for retrieval.
+ecg_data/
+*.mat
+*.hea
+
+# Generated artefacts
+outputs/tables/*.csv
+outputs/figures/*.png
+outputs/figures/*.html
+!outputs/**/.gitkeep
+artifacts/
+*.pt
+*.joblib
+*.pkl
+
+# Ray / tuning state
+ray_results/
+~/ray_results/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+
+# OS / editors
+.DS_Store
+Icon?
+.vscode/
+.idea/
+*.code-workspace
