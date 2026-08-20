@@ -1,0 +1,24 @@
+# Trees on the unscaled 18-feature matrix.
+# Selected by Ray Tune (trial 49f3eac4), then frozen so the evaluation path
+# reproduces without a multi-hour re-search. Regenerate with:
+#   python scripts/03_train.py --model xgb_18f --retune
+name: xgb_18f
+tuning:
+  n_trials: 30
+  cv_folds: 3
+  metric: f1_macro
+best_config:
+  trial_id: "49f3eac4"
+  max_depth: 6
+  min_child_weight: 5.0
+  gamma: 0.8040402570874933
+  subsample: 0.8194935157466344
+  colsample_bytree: 0.8767580790770773
+  reg_lambda: 4.053638704742312
+  reg_alpha: 6.225216726492816e-07
+  learning_rate: 0.11271327400947749
+  n_estimators: 1600
+threshold:
+  cv_folds: 5
+  optimal_cutoff: 0.30
+  selection_metric: f1_micro

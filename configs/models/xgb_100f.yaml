@@ -1,0 +1,24 @@
+# Trees on 100 Incremental-PCA components of the raw 250 Hz signal.
+# Selected by Ray Tune (trial d80b0ca2), then frozen. Regenerate with:
+#   python scripts/03_train.py --model xgb_100f --retune
+name: xgb_100f
+tuning:
+  n_trials: 30
+  cv_folds: 3
+  metric: f1_macro
+best_config:
+  trial_id: "d80b0ca2"
+  max_depth: 3
+  min_child_weight: 5.0
+  subsample: 0.7660611256618486
+  colsample_bytree: 0.7730982444721965
+  reg_lambda: 0.053108374071179854
+  reg_alpha: 2.734720046539017e-07
+  learning_rate: 0.14007651482718234
+  n_estimators: 1000
+threshold:
+  cv_folds: 5
+  # cross_val_predict cannot pass a fold-specific eval_set to XGBoost, so early
+  # stopping is disabled during out-of-fold cutoff estimation.
+  optimal_cutoff: 0.30
+  selection_metric: f1_micro

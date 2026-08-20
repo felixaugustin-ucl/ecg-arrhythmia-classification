@@ -1,0 +1,18 @@
+# PCA components of the 18 handcrafted features, then the same SGD search.
+name: sgd_13c
+pca:
+  n_components: 13
+tuning:
+  n_trials: 30
+  cv_folds: 3
+  metric: f1_macro
+best_config:
+  trial_id: "dc9c7a48"
+  alpha: 3.463037026119188e-06
+  loss: log_loss
+  penalty: l1
+  learning_rate: adaptive
+threshold:
+  cv_folds: 5
+  optimal_cutoff: 0.45
+  selection_metric: f1_micro

@@ -1,0 +1,18 @@
+# Selected by Ray Tune (trial 96991386), then frozen so the evaluation path
+# reproduces without a multi-hour re-search. Regenerate with:
+#   python scripts/03_train.py --model sgd_18f --retune
+name: sgd_18f
+tuning:
+  n_trials: 30
+  cv_folds: 3
+  metric: f1_macro
+best_config:
+  trial_id: "96991386"
+  alpha: 1.9616460353882896e-05
+  loss: log_loss
+  penalty: l1
+  learning_rate: adaptive
+threshold:
+  cv_folds: 5
+  optimal_cutoff: 0.45
+  selection_metric: f1_micro

@@ -1,0 +1,21 @@
+# Dataset construction. Paths resolve under ECG_DATA_ROOT (default ./ecg_data).
+source_fs_hz: 500
+target_fs_hz: 250
+feature_lead_index: 1   # 0-based; lead II
+
+split:
+  test_size: 0.20
+  val_size: 0.20        # carved out of the training portion, never the test set
+  random_seed: 42
+
+preprocessing:
+  # Both are RR-derived and undefined for short records, so they carry the most
+  # missingness of the 22 extracted features.
+  drop_columns:
+    - higuchi_fractal_dimension
+    - dfa_scaling_exponent
+  impute_strategy: median
+
+incremental_pca:
+  n_components: 100
+  batch_size: 128

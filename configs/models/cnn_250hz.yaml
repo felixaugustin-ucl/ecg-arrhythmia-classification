@@ -1,0 +1,17 @@
+# 1D ResNet over raw 250 Hz multi-lead signal. Not Ray-tuned: a single
+# architecture trained with early stopping on validation loss.
+name: cnn_250hz
+architecture:
+  base_channels: 32
+  layers: [2, 2, 2]
+training:
+  epochs: 8
+  batch_size: 32
+  eval_batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  early_stopping_patience: 3
+  device: cpu
+threshold:
+  optimal_cutoff: 0.35
+  selection_metric: f1_micro
