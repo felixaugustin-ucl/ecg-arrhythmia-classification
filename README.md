@@ -146,9 +146,18 @@ greatest global variance.
 **The CNN wins because it learns temporal filters.** At 250 Hz each sample is
 4 ms, so the stem's kernel of 15 spans ~60 ms and the residual blocks' kernel
 of 7 spans ~28 ms — both on the scale of a QRS complex, which typically runs
-60–120 ms. The architecture is matched to the physiology it needs to detect.
+60–120 ms (Sattar & Chhabra, 2023). The architecture is matched to the
+physiology it needs to detect.
 
 ![CNN_250Hz ResNet1D architecture compared with Weimann's ResNet](docs/figures/07-architecture-comparison.png)
+
+The right-hand column is the ResNet from [Weimann & Conrad (2021), *Transfer
+learning for ECG classification*](https://doi.org/10.1038/s41598-021-84374-8),
+used here as the reference design. Theirs is deeper — four residual stages
+against three — and substantially wider, running 64→512 channels where this one
+runs 32→128. The model here is deliberately smaller: it trains on CPU, and it
+uses a wider stem kernel (15 against 7) because at 250 Hz that spans a full QRS
+complex in a single convolution.
 
 **Every model collapses on macro metrics — but relative to baseline, that is
 where the CNN does best.** The best macro F1 is 0.22 against a micro F1 of
@@ -323,6 +332,76 @@ Nothing here is validated for diagnostic use.
 Six figures are embedded above. The full set — per-model tuning histories and
 cutoff sweeps, the conditional-probability matrix, feature correlations and
 lead-level examples — is indexed in [`docs/figures/`](docs/figures/).
+
+---
+
+## References
+
+**Dataset**
+
+Zheng, J., Guo, H. and Chu, H. (2022). *A large scale 12-lead electrocardiogram
+database for arrhythmia study* (version 1.0.0). PhysioNet.
+<https://doi.org/10.13026/wgex-er52>
+
+**Architecture**
+
+Weimann, K. and Conrad, T. O. F. (2021). Transfer learning for ECG
+classification. *Scientific Reports*, 11, Article 5251.
+<https://doi.org/10.1038/s41598-021-84374-8>
+
+Kiranyaz, S., Ince, T. and Gabbouj, M. (2016). Real-Time Patient-Specific ECG
+Classification by 1-D Convolutional Neural Networks. *IEEE Transactions on
+Biomedical Engineering*, 63(3), pp. 664–675.
+<https://doi.org/10.1109/TBME.2015.2468589>
+
+**Signal processing and features**
+
+Welch, P. D. (1967). The use of fast Fourier transform for the estimation of
+power spectra. *IEEE Transactions on Audio and Electroacoustics*, 15(2),
+pp. 70–73. <https://doi.org/10.1109/TAU.1967.1161901>
+
+Task Force of the European Society of Cardiology and the North American Society
+of Pacing and Electrophysiology (1996). Heart rate variability: standards of
+measurement, physiological interpretation and clinical use. *Circulation*,
+93(5), pp. 1043–1065. <https://doi.org/10.1161/01.CIR.93.5.1043>
+
+Pincus, S. M. (1991). Approximate entropy as a measure of system complexity.
+*PNAS*, 88(6), pp. 2297–2301. <https://doi.org/10.1073/pnas.88.6.2297>
+
+Richman, J. S. and Moorman, J. R. (2000). Physiological time-series analysis
+using approximate entropy and sample entropy. *American Journal of Physiology*,
+278(6), pp. H2039–H2049.
+<https://doi.org/10.1152/ajpheart.2000.278.6.H2039>
+
+Peng, C.-K., Havlin, S., Stanley, H. E. and Goldberger, A. L. (1995).
+Quantification of scaling exponents and crossover phenomena in nonstationary
+heartbeat time series. *Chaos*, 5(1), pp. 82–87.
+<https://doi.org/10.1063/1.166141>
+
+Higuchi, T. (1988). Approach to an irregular time series on the basis of the
+fractal theory. *Physica D*, 31(2), pp. 277–283.
+<https://doi.org/10.1016/0167-2789(88)90081-4>
+
+Postema, P. G. and Wilde, A. A. M. (2014). The measurement of the QT interval.
+*Pacing and Clinical Electrophysiology*, 37(5), pp. 631–642.
+<https://doi.org/10.1111/pace.12410>
+
+Sattar, Y. and Chhabra, L. (2023). *Electrocardiogram*. StatPearls. — source for
+the 60–120 ms QRS duration.
+
+**Method**
+
+Chen, W., Yang, K., Yu, Z. and Shi, Y. (2024). A survey on imbalanced learning:
+latest research, applications and future directions. *Artificial Intelligence
+Review*, 57(3), pp. 1–32. <https://doi.org/10.1007/s10462-024-10759-6>
+
+Psychophysiology (2023). Guidelines on ECG sampling frequency (250–1000 Hz) for
+heart period measurement in HRV studies.
+<https://doi.org/10.1111/j.1469-8986.2023.14604.x>
+
+Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. *Journal
+of Machine Learning Research*, 12, pp. 2825–2830.
+<https://jmlr.org/papers/v12/pedregosa11a.html>
 
 ---
 

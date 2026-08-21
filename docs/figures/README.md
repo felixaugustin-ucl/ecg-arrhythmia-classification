@@ -19,7 +19,7 @@ are the per-model detail behind the summary tables.
 
 | File | Shows |
 |---|---|
-| `07-architecture-comparison.png` | CNN_250Hz ResNet1D beside Weimann's ResNet |
+| `07-architecture-comparison.png` | CNN_250Hz ResNet1D beside [Weimann & Conrad's ResNet](https://doi.org/10.1038/s41598-021-84374-8) |
 | `08-decision-algorithm.png` | Tuning → metric ranking → recall-constrained cutoff |
 | `09-pca-feature-variance.png` | 13 components retain 96.0% of *feature* variance |
 | `10-pca-signal-variance.png` | 100 components retain only 52.0% of *signal* variance |
